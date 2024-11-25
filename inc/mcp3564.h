@@ -40,6 +40,7 @@
  void MCP3561_ADC_Shutdown(SPI_HandleTypeDef *hspi);
  void MCP3561_ADC_Full_Shutdown(SPI_HandleTypeDef *hspi);
  void MCP3561_Channels(SPI_HandleTypeDef *hspi, uint8_t ch_p, uint8_t ch_n);
+ void MCP3561_InputConf(SPI_HandleTypeDef *hspi, uint8_t boost, uint8_t gain, uint8_t az_mux);
  uint32_t MCP3561_ReadADCData    (SPI_HandleTypeDef *hspi);
  int32_t MCP3561_ReadADCData_24Bit (SPI_HandleTypeDef *hspi);
  int32_t MCP3561_ReadADCData_32Bit (SPI_HandleTypeDef *hspi);
