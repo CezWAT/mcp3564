@@ -38,12 +38,60 @@ uint8_t _MCP3561_sread(SPI_HandleTypeDef *hspi, uint8_t *cmd){
 	return reg8[1];
 }
 
+uint8_t _MCP3561_setBoostRegisterVal(uint16_t boost){
+    switch (boost)
+    {
+        case 1: return MCP3561_CONFIG2_BOOST_x1;
+        case 2: return MCP3561_CONFIG2_BOOST_x2;
+        case 5: return MCP3561_CONFIG2_BOOST_DIV2; // 1/2
+        case 66: return MCP3561_CONFIG2_BOOST_2DIV3; // 2/3
+        default: return 0; // unknown boost
+    }
+}
+
+uint8_t _MCP3561_setGainRegisterVal(uint16_t gain){
+    switch (gain)
+    {
+    	case 0: return MCP3561_CONFIG2_GAIN_DIV3;
+        case 1: return MCP3561_CONFIG2_GAIN_x1;
+        case 2: return MCP3561_CONFIG2_GAIN_x2;
+        case 4: return MCP3561_CONFIG2_GAIN_x4;
+        case 8: return MCP3561_CONFIG2_GAIN_x8;
+        case 16: return MCP3561_CONFIG2_GAIN_x16;
+        case 32: return MCP3561_CONFIG2_GAIN_x32;
+        case 64: return MCP3561_CONFIG2_GAIN_x64;
+        default: return 0; // unknown gain
+    }
+}
+
+uint8_t _MCP3561_setAZMUXRegisterVal(uint16_t az_mux){
+    switch (az_mux)
+    {
+        case 0: return MCP3561_CONFIG2_AZ_MUX_OFF;
+        case 1: return MCP3561_CONFIG2_AZ_MUX_ON;
+        default: return 0; // unknown AZ MUX setting
+    }
+}
+
 void MCP3561_Channels(SPI_HandleTypeDef *hspi, uint8_t ch_p, uint8_t ch_n){
 	uint8_t cmd[4] = {0,0,0,0};
 	cmd[0]  = MCP3561_MUX_WRITE;
 	cmd[1]  = (ch_p << 4) | ch_n;   // [7..4] VIN+ / [3..0] VIN-
 	//cmd[1]  = (MCP3561_MUX_CH_IntTemp_P << 4) | MCP3561_MUX_CH_IntTemp_M;   // [7..4] VIN+ / [3..0] VIN-
 	_MCP3561_write(hspi, cmd, 2);
+}
+
+/**
+ * @brief  Sets the MCP356x chip boost, gain & AZ_MUX
+ */
+void MCP3561_InputConf(SPI_HandleTypeDef *hspi, uint8_t boost, uint8_t gain, uint8_t az_mux){
+	uint8_t cmd[4] = {0, 0, 0, 0};
+	cmd[0]  = MCP3561_CONFIG2_WRITE;
+	cmd[1]  = _MCP3561_setBoostRegisterVal(boost);
+	cmd[1]  |= _MCP3561_setGainRegisterVal(gain);
+	cmd[1]  |= _MCP3561_setAZMUXRegisterVal(az_mux);
+	cmd[1] += 3; // last two bits must always be '11'
+	MCP3561_write(hspi, cmd, 2);
 }
 
 /**
